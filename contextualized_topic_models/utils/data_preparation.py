@@ -136,7 +136,7 @@ class TopicModelDataPreparation:
         self.vocab = self.vectorizer.get_feature_names()
         self.id2token = {k: v for k, v in zip(range(0, len(self.vocab)), self.vocab)}
 
-        if labels:
+        if labels is not None:
             encoded_labels = labels.values
         else:
             encoded_labels = None
