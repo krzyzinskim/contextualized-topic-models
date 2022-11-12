@@ -7,8 +7,16 @@ class ContextualInferenceNetwork(nn.Module):
 
     """Inference Network."""
 
-    def __init__(self, input_size, bert_size, output_size, hidden_sizes,
-                 activation='softplus', dropout=0.2, label_size=0):
+    def __init__(
+        self,
+        input_size,
+        bert_size,
+        output_size,
+        hidden_sizes,
+        activation="softplus",
+        dropout=0.2,
+        label_size=0,
+    ):
         """
         # TODO: check dropout in main caller
         Initialize InferenceNetwork.
@@ -23,10 +31,11 @@ class ContextualInferenceNetwork(nn.Module):
         super(ContextualInferenceNetwork, self).__init__()
         assert isinstance(input_size, int), "input_size must by type int."
         assert isinstance(output_size, int), "output_size must be type int."
-        assert isinstance(hidden_sizes, tuple), \
-            "hidden_sizes must be type tuple."
-        assert activation in ['softplus', 'relu'], \
-            "activation must be 'softplus' or 'relu'."
+        assert isinstance(hidden_sizes, tuple), "hidden_sizes must be type tuple."
+        assert activation in [
+            "softplus",
+            "relu",
+        ], "activation must be 'softplus' or 'relu'."
         assert dropout >= 0, "dropout must be >= 0."
 
         self.input_size = input_size
@@ -34,17 +43,27 @@ class ContextualInferenceNetwork(nn.Module):
         self.hidden_sizes = hidden_sizes
         self.dropout = dropout
 
-        if activation == 'softplus':
+        if activation == "softplus":
             self.activation = nn.Softplus()
-        elif activation == 'relu':
+        elif activation == "relu":
             self.activation = nn.ReLU()
 
         self.input_layer = nn.Linear(bert_size + label_size, hidden_sizes[0])
-        #self.adapt_bert = nn.Linear(bert_size, hidden_sizes[0])
+        # self.adapt_bert = nn.Linear(bert_size, hidden_sizes[0])
 
-        self.hiddens = nn.Sequential(OrderedDict([
-            ('l_{}'.format(i), nn.Sequential(nn.Linear(h_in, h_out), self.activation))
-            for i, (h_in, h_out) in enumerate(zip(hidden_sizes[:-1], hidden_sizes[1:]))]))
+        self.hiddens = nn.Sequential(
+            OrderedDict(
+                [
+                    (
+                        "l_{}".format(i),
+                        nn.Sequential(nn.Linear(h_in, h_out), self.activation),
+                    )
+                    for i, (h_in, h_out) in enumerate(
+                        zip(hidden_sizes[:-1], hidden_sizes[1:])
+                    )
+                ]
+            )
+        )
 
         self.f_mu = nn.Linear(hidden_sizes[-1], output_size)
         self.f_mu_batchnorm = nn.BatchNorm1d(output_size, affine=False)
@@ -76,8 +95,16 @@ class CombinedInferenceNetwork(nn.Module):
 
     """Inference Network."""
 
-    def __init__(self, input_size, bert_size, output_size, hidden_sizes,
-                 activation='softplus', dropout=0.2, label_size=0):
+    def __init__(
+        self,
+        input_size,
+        bert_size,
+        output_size,
+        hidden_sizes,
+        activation="softplus",
+        dropout=0.2,
+        label_size=0,
+    ):
         """
         Initialize InferenceNetwork.
 
@@ -91,10 +118,11 @@ class CombinedInferenceNetwork(nn.Module):
         super(CombinedInferenceNetwork, self).__init__()
         assert isinstance(input_size, int), "input_size must by type int."
         assert isinstance(output_size, int), "output_size must be type int."
-        assert isinstance(hidden_sizes, tuple), \
-            "hidden_sizes must be type tuple."
-        assert activation in ['softplus', 'relu'], \
-            "activation must be 'softplus' or 'relu'."
+        assert isinstance(hidden_sizes, tuple), "hidden_sizes must be type tuple."
+        assert activation in [
+            "softplus",
+            "relu",
+        ], "activation must be 'softplus' or 'relu'."
         assert dropout >= 0, "dropout must be >= 0."
 
         self.input_size = input_size
@@ -102,19 +130,28 @@ class CombinedInferenceNetwork(nn.Module):
         self.hidden_sizes = hidden_sizes
         self.dropout = dropout
 
-        if activation == 'softplus':
+        if activation == "softplus":
             self.activation = nn.Softplus()
-        elif activation == 'relu':
+        elif activation == "relu":
             self.activation = nn.ReLU()
 
+        self.adapt_bert = nn.Linear(bert_size, 1)
+        # self.bert_layer = nn.Linear(hidden_sizes[0], hidden_sizes[0])
+        self.input_layer = nn.Linear(input_size + 1 + label_size, hidden_sizes[0])
 
-        self.adapt_bert = nn.Linear(bert_size, input_size)
-        #self.bert_layer = nn.Linear(hidden_sizes[0], hidden_sizes[0])
-        self.input_layer = nn.Linear(input_size + input_size + label_size, hidden_sizes[0])
-
-        self.hiddens = nn.Sequential(OrderedDict([
-            ('l_{}'.format(i), nn.Sequential(nn.Linear(h_in, h_out), self.activation))
-            for i, (h_in, h_out) in enumerate(zip(hidden_sizes[:-1], hidden_sizes[1:]))]))
+        self.hiddens = nn.Sequential(
+            OrderedDict(
+                [
+                    (
+                        "l_{}".format(i),
+                        nn.Sequential(nn.Linear(h_in, h_out), self.activation),
+                    )
+                    for i, (h_in, h_out) in enumerate(
+                        zip(hidden_sizes[:-1], hidden_sizes[1:])
+                    )
+                ]
+            )
+        )
 
         self.f_mu = nn.Linear(hidden_sizes[-1], output_size)
         self.f_mu_batchnorm = nn.BatchNorm1d(output_size, affine=False)
