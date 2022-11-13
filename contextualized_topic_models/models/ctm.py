@@ -168,14 +168,11 @@ class CTM:
 
         # learned topics
         self.best_components = None
-<<<<<<< HEAD
         # Use cuda if available
         if torch.cuda.is_available():
             self.USE_CUDA = True
         else:
             self.USE_CUDA = False
-=======
->>>>>>> cd95ee5716de8cd1bb35c3dbc1c7a238cc109e65
 
     def _loss(
         self,
