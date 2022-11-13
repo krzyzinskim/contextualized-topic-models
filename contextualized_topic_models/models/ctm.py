@@ -168,11 +168,14 @@ class CTM:
 
         # learned topics
         self.best_components = None
+<<<<<<< HEAD
         # Use cuda if available
         if torch.cuda.is_available():
             self.USE_CUDA = True
         else:
             self.USE_CUDA = False
+=======
+>>>>>>> cd95ee5716de8cd1bb35c3dbc1c7a238cc109e65
 
     def _loss(
         self,
@@ -424,6 +427,8 @@ class CTM:
         """Validation epoch."""
         self.model.eval()
         val_loss = 0
+        kl_total_loss = 0
+        rl_total_loss = 0
         samples_processed = 0
         for batch_samples in loader:
             # batch_size x vocab_size
@@ -466,6 +471,8 @@ class CTM:
 
             loss = self.weights["beta"] * kl_loss + rl_loss
             loss = loss.sum()
+            kl_total_loss += self.weights["beta"] * kl_loss
+            rl_total_loss += rl_loss
 
             if labels is not None:
                 target_labels = torch.argmax(labels, 1)
@@ -479,6 +486,8 @@ class CTM:
             val_loss += loss.item()
 
         val_loss /= samples_processed
+        print("kl_total_loss:", kl_total_loss.sum() / samples_processed)
+        print("rl_total_loss:", rl_total_loss.sum() / samples_processed)
 
         return samples_processed, val_loss
 
